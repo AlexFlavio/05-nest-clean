@@ -24,7 +24,7 @@ export class CreateQuestionController {
   @HttpCode(201)
   async handle(
     @Body(bodyValidationPipe) body: CreateQuestionBodySchema,
-    @CurrentUser() user: UserPayload
+    @CurrentUser() user: UserPayload,
   ) {
     const { title, content } = body
     const userId = user.sub
@@ -35,12 +35,10 @@ export class CreateQuestionController {
       data: {
         content,
         title,
-        slug: slug,
+        slug,
         authorId: userId,
       },
     })
-
-    return
   }
 
   private convertToSlug(title: string): string {

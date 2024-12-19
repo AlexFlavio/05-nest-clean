@@ -23,7 +23,7 @@ type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>
 export class AuthenticateController {
   constructor(
     private prisma: PrismaService,
-    private jwt: JwtService
+    private jwt: JwtService,
   ) {}
 
   @Post()
@@ -39,6 +39,10 @@ export class AuthenticateController {
     }
 
     const isPasswordValid = await compare(password, user.password)
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException("User credentials do not match.")
+    }
 
     const accessToken = this.jwt.sign({ sub: user.id })
 

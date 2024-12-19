@@ -9,9 +9,11 @@ export class PrismaService
   constructor() {
     super({ log: ["warn", "error"] })
   }
+
   onModuleInit() {
     return this.$connect()
   }
+
   onModuleDestroy() {
     return this.$disconnect()
   }
