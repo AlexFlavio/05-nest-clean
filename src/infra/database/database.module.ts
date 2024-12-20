@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common"
 import { PrismaService } from "./prisma/prisma.service"
-import { PrismaQuestionAttachmentsRepository } from "./prisma/repositories/primas-question-attachments-repository"
+import { PrismaQuestionAttachmentsRepository } from "./prisma/repositories/prima-question-attachments-repository"
 import { PrismaAnswerAttachmentsRepository } from "./prisma/repositories/prisma-answer-attachments-repository"
 import { PrismaAnswerCommentsRepository } from "./prisma/repositories/prisma-answer-comments-repository"
 import { PrismaAnswersRepository } from "./prisma/repositories/prisma-answers-repository"
