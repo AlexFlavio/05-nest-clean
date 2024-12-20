@@ -1,5 +1,5 @@
-import { AppModule } from "@/app.module"
-import { PrismaService } from "@/prisma/prisma.service"
+import { AppModule } from "@/infra/app.module"
+import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { INestApplication } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { Test } from "@nestjs/testing"
@@ -62,8 +62,6 @@ describe("Fetch Recent Questions (E2E)", () => {
       .send()
 
     expect(response.statusCode).toBe(200)
-
-    console.log(response.body)
 
     expect(response.body).toEqual({
       questions: [
