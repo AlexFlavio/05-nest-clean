@@ -3,7 +3,7 @@ import { AnswerCommentsRepository } from "@/domain/forum/application/repositorie
 import { AnswerComment } from "@/domain/forum/enterprise/entities/answer-comment"
 import { Injectable } from "@nestjs/common"
 import { PrismaService } from "../prisma.service"
-import { PrismaAnswerMapper } from "./mappers/prisma-answer-mapper"
+import { PrismaAnswerCommentMapper } from "./mappers/prisma-answer-comment-mapper"
 
 @Injectable({})
 export class PrismaAnswerCommentsRepository
@@ -12,29 +12,45 @@ export class PrismaAnswerCommentsRepository
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string) {
-    const answer = await this.prisma.answer.findUnique({
+    const answerComment = await this.prisma.comment.findUnique({
       where: { id },
     })
 
-    if (!answer) {
+    if (!answerComment) {
       return null
     }
 
-    return PrismaAnswerMapper.toDomain(answer)
+    return PrismaAnswerCommentMapper.toDomain(answerComment)
   }
 
-  findManyByAnswerId(
-    answerId: string,
-    params: PaginationParams,
-  ): Promise<AnswerComment[]> {
-    throw new Error("Method not implemented.")
+  async findManyByAnswerId(answerId: string, { page }: PaginationParams) {
+    const perPage = 20
+    const answerComments = await this.prisma.comment.findMany({
+      where: {
+        answerId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: perPage,
+      skip: (page - 1) * perPage,
+    })
+
+    return answerComments.map(PrismaAnswerCommentMapper.toDomain)
   }
 
-  create(answerComment: AnswerComment): Promise<void> {
-    throw new Error("Method not implemented.")
+  async create(answerComment: AnswerComment) {
+    const data = PrismaAnswerCommentMapper.toPrisma(answerComment)
+    await this.prisma.comment.create({
+      data,
+    })
   }
 
-  delete(answerComment: AnswerComment): Promise<void> {
-    throw new Error("Method not implemented.")
+  async delete(answerComment: AnswerComment) {
+    await this.prisma.comment.delete({
+      where: {
+        id: answerComment.id.toString(),
+      },
+    })
   }
 }
