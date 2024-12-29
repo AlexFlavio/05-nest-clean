@@ -2,13 +2,25 @@ import { PaginationParams } from "@/core/repositories/pagination-params"
 import { AnswerCommentsRepository } from "@/domain/forum/application/repositories/answer-comments-repository"
 import { AnswerComment } from "@/domain/forum/enterprise/entities/answer-comment"
 import { Injectable } from "@nestjs/common"
+import { PrismaService } from "../prisma.service"
+import { PrismaAnswerMapper } from "./mappers/prisma-answer-mapper"
 
 @Injectable({})
 export class PrismaAnswerCommentsRepository
   implements AnswerCommentsRepository
 {
-  findById(id: string): Promise<AnswerComment | null> {
-    throw new Error("Method not implemented.")
+  constructor(private prisma: PrismaService) {}
+
+  async findById(id: string) {
+    const answer = await this.prisma.answer.findUnique({
+      where: { id },
+    })
+
+    if (!answer) {
+      return null
+    }
+
+    return PrismaAnswerMapper.toDomain(answer)
   }
 
   findManyByAnswerId(
