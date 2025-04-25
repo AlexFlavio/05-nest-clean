@@ -1,6 +1,6 @@
-import { Slug } from "@/domain/forum/enterprise/entities/value-objects/slug"
 import { AppModule } from "@/infra/app.module"
 import { DatabaseModule } from "@/infra/database/database.module"
+import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { INestApplication } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { Test } from "@nestjs/testing"
@@ -8,11 +8,12 @@ import request from "supertest"
 import { QuestionFactory } from "test/factories/make-question"
 import { StudentFactory } from "test/factories/make-student"
 
-describe("Fetch Recent Questions (E2E)", () => {
+describe("Edit Question (E2E)", () => {
   let app: INestApplication
   let studentFactory: StudentFactory
-  let questionFactory: QuestionFactory
+  let prisma: PrismaService
   let jwt: JwtService
+  let questionFactory: QuestionFactory
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -23,36 +24,38 @@ describe("Fetch Recent Questions (E2E)", () => {
     app = moduleRef.createNestApplication()
     studentFactory = moduleRef.get(StudentFactory)
     questionFactory = moduleRef.get(QuestionFactory)
-
+    prisma = moduleRef.get(PrismaService)
     jwt = moduleRef.get(JwtService)
 
     await app.init()
   })
-  test("[GET] /questions", async () => {
+  test("[PUT] /questions/:id", async () => {
     const user = await studentFactory.makePrismaStudent()
 
     const access_token = jwt.sign({ sub: user.id.toString() })
 
-    for (let i = 1; i <= 3; i++) {
-      await questionFactory.makePrismaQuestion({
-        slug: Slug.create(`question-0${i}`),
-        authorId: user.id,
-      })
-    }
+    const question = await questionFactory.makePrismaQuestion({
+      authorId: user.id,
+    })
+
+    const questionId = question.id.toString()
 
     const response = await request(app.getHttpServer())
-      .get("/questions")
+      .put(`/questions/${questionId}`)
       .set("Authorization", `Bearer ${access_token}`)
-      .send()
+      .send({
+        content: "New Question Content",
+        title: "New title",
+      })
+    expect(response.statusCode).toBe(204)
 
-    expect(response.statusCode).toBe(200)
-
-    expect(response.body).toEqual({
-      questions: expect.arrayContaining([
-        expect.objectContaining({ slug: "question-03" }),
-        expect.objectContaining({ slug: "question-02" }),
-        expect.objectContaining({ slug: "question-01" }),
-      ]),
+    const userOnDatabase = await prisma.question.findFirst({
+      where: {
+        content: "New Question Content",
+        title: "New title",
+      },
     })
+
+    expect(userOnDatabase).toBeTruthy()
   })
 })
