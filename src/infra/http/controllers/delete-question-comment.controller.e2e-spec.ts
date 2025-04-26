@@ -9,7 +9,7 @@ import { QuestionFactory } from "test/factories/make-question"
 import { QuestionCommentFactory } from "test/factories/make-question-comment"
 import { StudentFactory } from "test/factories/make-student"
 
-describe("Delete Answer (E2E)", () => {
+describe("Delete Question Comment (E2E)", () => {
   let app: INestApplication
   let studentFactory: StudentFactory
   let questionFactory: QuestionFactory
@@ -32,7 +32,7 @@ describe("Delete Answer (E2E)", () => {
 
     await app.init()
   })
-  test("[DELETE] /answers/:id", async () => {
+  test("[DELETE] /questions/comments/:id", async () => {
     const user = await studentFactory.makePrismaStudent()
 
     const access_token = jwt.sign({ sub: user.id.toString() })
